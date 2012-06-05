@@ -6,9 +6,12 @@ script
   <%= app.upcase %>_<%= process.name.upcase %>_SCALE=$(su - <%= user %> -c 'echo $<%= app.upcase %>_<%= process.name.upcase %>_SCALE')
   [ -z $<%= app.upcase %>_<%= process.name.upcase %>_SCALE ] && <%= app.upcase %>_<%= process.name.upcase %>_SCALE=0
   export <%= app.upcase %>_<%= process.name.upcase %>_SCALE
-  for (( i=1; i <= $<%= app.upcase %>_<%= process.name.upcase %>_SCALE; i++ ))
-  do
+
+  i=1
+  while [ $i -le $<%= app.upcase %>_<%= process.name.upcase %>_SCALE ]; do
     start <%= app %>-<%= process.name %>-instance <%= app.upcase %>_<%= process.name.upcase %>_INSTANCE=$i
+    i=$(( $i + 1 ))
   done
+
 end script
 
