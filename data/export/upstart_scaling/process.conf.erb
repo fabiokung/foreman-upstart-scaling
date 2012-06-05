@@ -4,7 +4,49 @@ respawn
 respawn limit 10 5
 
 instance $<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE
-export <%= app.upcase %>_<%= process.name.upcase %>_INSTANCE
 
-exec su - <%= user %> -c '(<%= process.command %> 2>&1 1>&3 | tee | logger -i -t <%= app %>-<%=process.name%>-$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE -p local0.err) 3>&1 1>&2 | logger -i -t <%= app %>-<%=process.name%>-$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE -p local0.notice'
+env PORT=<%= port %>
+<% engine.environment.each_pair do |var,value| -%>
+env <%= var.upcase %>=<%= value %>
+<% end -%>
+
+
+script
+  cd <%= engine.directory %>
+  name="<%= app %>-<%=process.name%>-$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE"
+
+  # This little dance pipes output into logger with three
+  # goals in mind:
+  #  - Keep the process as a direct child of init (so upstart
+  #    doesn't get confused).
+  #  - Make sure logger isn't a child of the process (so it
+  #    doesn't get confused).
+  #  - Don't leave cruft sitting around in the filesystem.
+
+  # See `man 7 fifo` and `man 7 pipe` for more info.
+  stdout_fifo="<%= log_root %>/$name-stdout-fifo.log"
+  stderr_fifo="<%= log_root %>/$name-stderr-fifo.log"
+  mkfifo $stdout_fifo
+  mkfifo $stderr_fifo
+
+  # Start logger reading from the fifos, in the background.
+  # The parens cause the logger process to be reparented to
+  # init, rather than remaining a child of the current proc.
+  ( logger -i -p local0.notice -t $name <$stdout_fifo & )
+  ( logger -i -p local0.err    -t $name <$stderr_fifo & )
+
+  # Redirect the current shell's output to the fifos. Now that
+  # we have open fds for those fifos, we don't need the file
+  # system entries any more...
+  exec >$stdout_fifo 2>$stderr_fifo
+
+  # ...so we'll remove it.
+  rm $stdout_fifo
+  rm $stderr_fifo
+
+  # Run the service in the usual way. Our output is already
+  # going to the fifos; that won't change when the new
+  # program executes.
+  exec su - <%= user %> -c '<%= process.command %>'
+end script
 

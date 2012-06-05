@@ -17,6 +17,10 @@ being used to launch the process), the upstart configuration assumes
 
 Fabio Kung
 
+# Credits
+
+David Dollar (@ddollar), for the work on foreman.
+Keith Rarick (@kr), for the `fifo(7)` dance.
 
 # License
 
