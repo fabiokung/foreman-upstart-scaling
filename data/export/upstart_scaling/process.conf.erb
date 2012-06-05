@@ -24,8 +24,11 @@ script
   #  - Don't leave cruft sitting around in the filesystem.
 
   # See `man 7 fifo` and `man 7 pipe` for more info.
+  mkdir -p <%= log_root %>
   stdout_fifo="<%= log_root %>/$name-stdout-log.fifo"
   stderr_fifo="<%= log_root %>/$name-stderr-log.fifo"
+  rm -f $stdout_fifo
+  rm -f $stderr_fifo
   mkfifo $stdout_fifo
   mkfifo $stderr_fifo
 
@@ -47,6 +50,6 @@ script
   # Run the service in the usual way. Our output is already
   # going to the fifos; that won't change when the new
   # program executes.
-  exec su - <%= user %> -c '<%= process.command %>'
+  exec sudo -i -u <%= user %> '<%= process.command %>'
 end script
 
