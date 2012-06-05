@@ -6,9 +6,9 @@ respawn limit 10 5
 instance $<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE
 
 env PORT=<%= port %>
-<% engine.environment.each_pair do |var,value| -%>
+<% engine.environment.each_pair do |var,value| %>
 env <%= var.upcase %>=<%= value %>
-<% end -%>
+<% end %>
 
 
 script
