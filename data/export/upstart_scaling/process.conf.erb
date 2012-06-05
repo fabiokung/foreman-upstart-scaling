@@ -1,0 +1,10 @@
+stop on stopping <%= app %>-<%= process.name %>
+
+respawn
+respawn limit 10 5
+
+instance $<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE
+export <%= app.upcase %>_<%= process.name.upcase %>_INSTANCE
+
+exec su - <%= user %> -c '(<%= process.command %> 2>&1 1>&3 | tee | logger -i -t <%= app %>-<%=process.name%>-<%=num%> -p local0.err) 3>&1 1>&2 | logger -i -t <%= app %>-<%=process.name%>-<%=num%> -p local0.notice'
+

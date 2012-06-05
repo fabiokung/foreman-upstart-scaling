@@ -1,0 +1,12 @@
+start on starting <%= app %>-<%= process.name %>
+
+task
+
+script
+  [ -z $<%= app.upcase %>_<%= process.name.upcase %>_SCALE ] && export <%= app.upcase %>_<%= process.name.upcase %>_SCALE=0
+  for (( i=1; i <= $<%= app.upcase %>_<%= process.name.upcase %>_SCALE; i++ ))
+  do
+    start <%= app %>-<%= process.name %>-instance <%= app.upcase %>_<%= process.name.upcase %>_INSTANCE=$i
+  done
+end script
+
