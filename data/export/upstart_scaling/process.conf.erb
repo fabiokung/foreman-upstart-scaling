@@ -2,14 +2,15 @@ stop on stopping <%= app %>-<%= process.name %>
 
 respawn
 respawn limit 10 5
+kill timeout 20
 
 instance $<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE
 
+# TODO sudo overwrites this those env vars
 env PORT=<%= port %>
 <% engine.environment.each_pair do |var,value| %>
 env <%= var.upcase %>=<%= value %>
 <% end %>
-
 
 script
   cd <%= engine.directory %>
@@ -50,6 +51,6 @@ script
   # Run the service in the usual way. Our output is already
   # going to the fifos; that won't change when the new
   # program executes.
-  exec sudo -i -u <%= user %> '<%= process.command %>'
+  exec sudo -H -i -u <%= user %> '<%= process.command %>'
 end script
 
