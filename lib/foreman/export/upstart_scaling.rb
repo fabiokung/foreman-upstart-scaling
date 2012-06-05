@@ -11,7 +11,7 @@ class Foreman::Export::UpstartScaling < Foreman::Export::Base
 
     app = self.app || File.basename(engine.directory)
     user = self.user || app
-    template_root = self.template
+    template_root = self.template || File.expand_path("../../../data/export/upstart_scaling", __FILE__)
 
     Dir["#{location}/#{app}*.conf"].each do |file|
       say "cleaning up: #{file}"
