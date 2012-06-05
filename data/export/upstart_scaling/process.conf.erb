@@ -24,8 +24,8 @@ script
   #  - Don't leave cruft sitting around in the filesystem.
 
   # See `man 7 fifo` and `man 7 pipe` for more info.
-  stdout_fifo="<%= log_root %>/$name-stdout-fifo.log"
-  stderr_fifo="<%= log_root %>/$name-stderr-fifo.log"
+  stdout_fifo="<%= log_root %>/$name-stdout-log.fifo"
+  stderr_fifo="<%= log_root %>/$name-stderr-log.fifo"
   mkfifo $stdout_fifo
   mkfifo $stderr_fifo
 
