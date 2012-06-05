@@ -36,8 +36,14 @@ script
   # Start logger reading from the fifos, in the background.
   # The parens cause the logger process to be reparented to
   # init, rather than remaining a child of the current proc.
-  ( logger -i -p local0.notice -t $name <$stdout_fifo & )
-  ( logger -i -p local0.err    -t $name <$stderr_fifo & )
+  #
+  # `setsid` will cause loggers to be in a different session
+  # and process group. If we let the loggers be in the same
+  # process group as the main process, they would be killed
+  # by upstart together with the main process, and all output
+  # would be suppressed during termination.
+  ( exec setsid logger -i -p local0.notice -t $name <$stdout_fifo & )
+  ( exec setsid logger -i -p local0.err    -t $name <$stderr_fifo & )
 
   # Redirect the current shell's output to the fifos. Now that
   # we have open fds for those fifos, we don't need the file
