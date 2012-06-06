@@ -6,7 +6,6 @@ kill timeout 20
 
 instance $<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE
 
-# TODO sudo overwrites this those env vars
 env PORT=<%= port %>
 <% engine.environment.each_pair do |var,value| %>
 env <%= var.upcase %>=<%= value %>
@@ -54,9 +53,13 @@ script
   rm $stdout_fifo
   rm $stderr_fifo
 
+  # store ENV, as `sudo -i` don't preserve it
+
+  echo "PORT=$PORT <%= app.upcase %>_<%= process.name.upcase %>_INSTANCE=$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE<% engine.environment.each_pair do |var,value| %> <%= var.upcase %>=<%= value %><% end %>" > /tmp/$name.env
+
   # Run the service in the usual way. Our output is already
   # going to the fifos; that won't change when the new
   # program executes.
-  exec sudo -H -i -u <%= user %> '<%= process.command %>'
+  exec sudo -u <%= user %> '$(cat /tmp/$name.env)' -i '<%= process.command %>'
 end script
 
