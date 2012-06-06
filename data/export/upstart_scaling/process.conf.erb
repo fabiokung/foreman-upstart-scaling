@@ -13,7 +13,7 @@ env <%= var.upcase %>=<%= value %>
 
 script
   cd <%= engine.directory %>
-  name="<%= app %>-<%=process.name%>-$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE"
+  export name="<%= app %>-<%=process.name%>-$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE"
 
   # This little dance pipes output into logger with three
   # goals in mind:
