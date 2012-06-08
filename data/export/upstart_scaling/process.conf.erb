@@ -55,11 +55,14 @@ script
 
   # store ENV, as `sudo -i` don't preserve it
 
-  echo "PORT=$PORT <%= app.upcase %>_<%= process.name.upcase %>_INSTANCE=$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE<% engine.environment.each_pair do |var,value| %> <%= var.upcase %>=<%= value %><% end %>" > /tmp/$name.env
+  envfile=$(mktemp)
+  echo "PORT=$PORT <%= app.upcase %>_<%= process.name.upcase %>_INSTANCE=$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE<% engine.environment.each_pair do |var,value| %> <%= var.upcase %>=<%= value %><% end %>" > $envfile
+  chmod 0700 $envfile
+  chown <%= user %> $envfile
 
   # Run the service in the usual way. Our output is already
   # going to the fifos; that won't change when the new
   # program executes.
-  exec sudo -u <%= user %> $(envline=$(cat /tmp/$name.env); rm -r /tmp/$name.env; echo $envline) -i '<%= process.command %>'
+  exec sudo -u <%= user %> $(envline=$(cat $envfile); rm -f $envfile; echo $envline) -i '<%= process.command %>'
 end script
 
