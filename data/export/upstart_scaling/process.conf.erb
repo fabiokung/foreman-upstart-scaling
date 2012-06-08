@@ -60,6 +60,6 @@ script
   # Run the service in the usual way. Our output is already
   # going to the fifos; that won't change when the new
   # program executes.
-  exec sudo -u <%= user %> $(cat /tmp/$name.env) -i '<%= process.command %>'
+  exec sudo -u <%= user %> $(envline=$(cat /tmp/$name.env); rm -r /tmp/$name.env; echo $envline) -i '<%= process.command %>'
 end script
 
