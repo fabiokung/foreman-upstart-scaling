@@ -32,6 +32,7 @@ class Foreman::Export::UpstartScaling < Foreman::Export::Base
       process_instances_config = ERB.new(process_instances_template).result(binding)
       write_file "#{location}/#{app}-#{process.name}-instances.conf", process_instances_config
 
+      port = self.port
       process_template = export_template("upstart_scaling", "process.conf.erb", template_root)
       process_config = ERB.new(process_template).result(binding)
       write_file "#{location}/#{app}-#{process.name}-instance.conf", process_config
