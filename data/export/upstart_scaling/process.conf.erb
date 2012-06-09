@@ -53,8 +53,7 @@ script
   rm $stdout_fifo
   rm $stderr_fifo
 
-  # store ENV, as `sudo -i` don't preserve it
-
+  # store ENV, as `sudo -i` doesn't preserve it
   envfile=$(mktemp)
   echo "PORT=$PORT <%= app.upcase %>_<%= process.name.upcase %>_INSTANCE=$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE<% engine.environment.each_pair do |var,value| %> <%= var.upcase %>=<%= value %><% end %>" > $envfile
   chmod 0700 $envfile
