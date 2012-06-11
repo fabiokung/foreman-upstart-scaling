@@ -31,6 +31,11 @@ script
   mkfifo $stdout_fifo
   mkfifo $stderr_fifo
 
+  # Capture our pid so we can pass it to logger to record 
+  # the pid of the actual job and not the pid of the logger
+  # background process.
+  job_pid=$$
+
   # Start logger reading from the fifos, in the background.
   # The parens cause the logger process to be reparented to
   # init, rather than remaining a child of the current proc.
@@ -40,8 +45,8 @@ script
   # process group as the main process, they would be killed
   # by upstart together with the main process, and all output
   # would be suppressed during termination.
-  ( exec setsid logger -i -p local0.notice -t $name <$stdout_fifo & )
-  ( exec setsid logger -i -p local0.err    -t $name <$stderr_fifo & )
+  ( exec setsid logger -p local0.notice -t "$name[$job_pid]" <$stdout_fifo & )
+  ( exec setsid logger -p local0.err    -t "$name[$job_pid]" <$stderr_fifo & )
 
   # Redirect the current shell's output to the fifos. Now that
   # we have open fds for those fifos, we don't need the file
@@ -58,4 +63,3 @@ script
 
   exec sudo -u <%= user %> PORT=$(( $PORT + $INSTANCE )) <%= process.name.upcase.gsub('-', '_') %>_INSTANCE=$INSTANCE<% engine.environment.each_pair do |var,value| %> <%= var.upcase %>=<%= value %><% end %> -i "<%= process.command %>"
 end script
-
