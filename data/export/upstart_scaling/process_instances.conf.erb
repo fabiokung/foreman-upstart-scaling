@@ -3,15 +3,13 @@ start on starting <%= app %>-<%= process.name %>
 task
 
 script
-  <%= app.upcase %>_<%= process.name.upcase %>_SCALE=$(su - <%= user %> -c 'echo $<%= app.upcase %>_<%= process.name.upcase %>_SCALE')
-  [ -z $<%= app.upcase %>_<%= process.name.upcase %>_SCALE ] && <%= app.upcase %>_<%= process.name.upcase %>_SCALE=0
-  export <%= app.upcase %>_<%= process.name.upcase %>_SCALE
+  SCALE=$(su - <%= user %> -c 'echo $<%= process.name.upcase.gsub("-", "_") %>_SCALE')
+  [ -z $SCALE ] && SCALE=0
+  export SCALE
 
   i=1
-  while [ $i -le $<%= app.upcase %>_<%= process.name.upcase %>_SCALE ]; do
-    start <%= app %>-<%= process.name %>-instance <%= app.upcase %>_<%= process.name.upcase %>_INSTANCE=$i
+  while [ $i -le $SCALE ]; do
+    start <%= app %>-<%= process.name %>-instance INSTANCE=$i
     i=$(( $i + 1 ))
   done
-
 end script
-

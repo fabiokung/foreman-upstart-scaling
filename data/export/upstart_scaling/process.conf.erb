@@ -4,7 +4,7 @@ respawn
 respawn limit 10 5
 kill timeout 20
 
-instance $<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE
+instance $INSTANCE
 
 env PORT=<%= port %>
 <% engine.environment.each_pair do |var,value| %>
@@ -13,7 +13,7 @@ env <%= var.upcase %>=<%= value %>
 
 script
   cd <%= engine.directory %>
-  export name="<%= app %>-<%=process.name%>-$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE"
+  export name="<%= app %>-<%=process.name%>-$INSTANCE"
 
   # This little dance pipes output into logger with three
   # goals in mind:
