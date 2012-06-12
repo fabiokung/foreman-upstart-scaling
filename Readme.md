@@ -5,12 +5,13 @@ setting from foreman. The number of processes running will be controlled by
 environment variables of the following format:
 
 ```
-APP_PROCESSNAME_SCALE=N
+PROCESSNAME_SCALE=N
 ```
 
 If there is no such variable in the user's environment (where `user` is the one
 being used to launch the process), the upstart configuration assumes
-`APP_PROCESSNAME_SCALE=0`.
+`PROCESSNAME_SCALE=0`. If the process name contains `-` (dashes), they will be
+replaced with `_` (underscores).
 
 
 # Authors
