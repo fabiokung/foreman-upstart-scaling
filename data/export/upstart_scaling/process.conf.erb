@@ -61,5 +61,5 @@ script
   # going to the fifos; that won't change when the new
   # program executes.
 
-  exec sudo -u <%= user %> PORT=$(( $PORT + $INSTANCE )) <%= process.name.upcase.gsub('-', '_') %>_INSTANCE=$INSTANCE<% engine.environment.each_pair do |var,value| %> <%= var.upcase %>=<%= value %><% end %> -i "<%= process.command %>"
+  exec sudo -u <%= user %> PORT=$(( $PORT + $INSTANCE - 1 )) <%= process.name.upcase.gsub('-', '_') %>_INSTANCE=$INSTANCE<% engine.environment.each_pair do |var,value| %> <%= var.upcase %>=<%= value %><% end %> -i "<%= process.command %>"
 end script
