@@ -4,7 +4,7 @@ respawn
 respawn limit 10 5
 kill timeout 20
 
-instance $<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE
+instance $INSTANCE
 
 env PORT=<%= port %>
 <% engine.environment.each_pair do |var,value| %>
@@ -12,8 +12,7 @@ env <%= var.upcase %>=<%= value %>
 <% end %>
 
 script
-  cd <%= engine.directory %>
-  export name="<%= app %>-<%=process.name%>-$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE"
+  export name="<%= app %>-<%=process.name%>-$INSTANCE"
 
   # This little dance pipes output into logger with three
   # goals in mind:
@@ -32,6 +31,11 @@ script
   mkfifo $stdout_fifo
   mkfifo $stderr_fifo
 
+  # Capture our pid so we can pass it to logger to record 
+  # the pid of the actual job and not the pid of the logger
+  # background process.
+  job_pid=$$
+
   # Start logger reading from the fifos, in the background.
   # The parens cause the logger process to be reparented to
   # init, rather than remaining a child of the current proc.
@@ -41,27 +45,21 @@ script
   # process group as the main process, they would be killed
   # by upstart together with the main process, and all output
   # would be suppressed during termination.
-  ( exec setsid logger -i -p local0.notice -t $name <$stdout_fifo & )
-  ( exec setsid logger -i -p local0.err    -t $name <$stderr_fifo & )
+  ( exec setsid logger -p local0.notice -t "$name[$job_pid]" <$stdout_fifo & )
+  ( exec setsid logger -p local0.err    -t "$name[$job_pid]" <$stderr_fifo & )
 
   # Redirect the current shell's output to the fifos. Now that
   # we have open fds for those fifos, we don't need the file
   # system entries any more...
   exec >$stdout_fifo 2>$stderr_fifo
 
-  # ...so we'll remove it.
+  # ...so we'll remove them.
   rm $stdout_fifo
   rm $stderr_fifo
-
-  # store ENV, as `sudo -i` doesn't preserve it
-  envfile=$(mktemp)
-  echo "PORT=$PORT <%= app.upcase %>_<%= process.name.upcase %>_INSTANCE=$<%= app.upcase %>_<%= process.name.upcase %>_INSTANCE<% engine.environment.each_pair do |var,value| %> <%= var.upcase %>=<%= value %><% end %>" > $envfile
-  chmod 0700 $envfile
-  chown <%= user %> $envfile
 
   # Run the service in the usual way. Our output is already
   # going to the fifos; that won't change when the new
   # program executes.
-  exec sudo -u <%= user %> $(envline=$(cat $envfile); rm -f $envfile; echo $envline) -i '<%= process.command %>'
-end script
 
+  exec sudo -u <%= user %> PORT=$(( $PORT + $INSTANCE )) <%= process.name.upcase.gsub('-', '_') %>_INSTANCE=$INSTANCE<% engine.environment.each_pair do |var,value| %> <%= var.upcase %>=<%= value %><% end %> -i "<%= process.command %>"
+end script
