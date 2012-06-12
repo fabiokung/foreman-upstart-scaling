@@ -18,6 +18,10 @@ replaced with `_` (underscores).
 
 * Fabio Kung
 
+# Contributors
+
+* Michael Hale
+
 # Credits
 
 * David Dollar (@ddollar), for the work on foreman.
