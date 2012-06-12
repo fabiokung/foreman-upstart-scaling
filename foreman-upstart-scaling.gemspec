@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name = "foreman-upstart-scaling"
   s.email = "fabio.kung@gmail.com"
-  s.version = "0.4"
+  s.version = "0.5.0.pre"
   s.description = "Upstart exporter for foreman, that supports worker scaling via env vars."
   s.summary = "Upstart configuration generator for foreman"
   s.authors = ["Fabio Kung"]
