@@ -1,4 +1,4 @@
-stop on stopping <%= app %>-<%= process.name %>
+stop on stopping <%= app %>-<%= name %>
 
 respawn
 respawn limit 10 5
@@ -6,8 +6,10 @@ kill timeout 20
 
 instance $INSTANCE
 
+# Sentinel
+
 env PORT=<%= port %>
-<% engine.environment.each_pair do |var,value| %>
+<% engine.env.each_pair do |var,value| %>
 env <%= var.upcase %>=<%= value %>
 <% end %>
 
@@ -23,9 +25,9 @@ script
   #  - Don't leave cruft sitting around in the filesystem.
 
   # See `man 7 fifo` and `man 7 pipe` for more info.
-  mkdir -p <%= log_root %>
-  stdout_fifo="<%= log_root %>/$name-stdout-log.fifo"
-  stderr_fifo="<%= log_root %>/$name-stderr-log.fifo"
+  mkdir -p <%= log %>
+  stdout_fifo="<%= log %>/$name-stdout-log.fifo"
+  stderr_fifo="<%= log %>/$name-stderr-log.fifo"
   rm -f $stdout_fifo
   rm -f $stderr_fifo
   mkfifo $stdout_fifo

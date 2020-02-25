@@ -1,14 +1,14 @@
-start on starting <%= app %>-<%= process.name %>
+start on starting <%= app %>-<%= name %>
 
 task
 
 script
-  SCALE=$(su - <%= user %> -c 'echo $<%= process.name.upcase.gsub("-", "_") %>_SCALE')
+  SCALE=$(su - <%= user %> -c 'echo $<%= name.upcase.gsub("-", "_") %>_SCALE')
   [ -z $SCALE ] && SCALE=0
 
   i=1
   while [ $i -le $SCALE ]; do
-    start <%= app %>-<%= process.name %>-instance INSTANCE=$i
+    start <%= app %>-<%= name %>-instance INSTANCE=$i
     i=$(( $i + 1 ))
   done
 end script

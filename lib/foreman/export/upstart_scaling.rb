@@ -5,39 +5,39 @@ require "foreman/export"
 class Foreman::Export::UpstartScaling < Foreman::Export::Base
 
   def export
-    error("Must specify a location") unless location
-    FileUtils.mkdir_p location
-    @location = Pathname.new(@location)
-
-    app = self.app || File.basename(engine.directory)
-    user = self.user || app
-    log_root = self.log || "/var/log/#{app}"
-    template_root = self.template || File.expand_path("../../../../data/export/upstart_scaling", __FILE__)
+    super
 
     Dir["#{location}/#{app}*.conf"].each do |file|
-      say "cleaning up: #{file}"
-      FileUtils.rm(file)
+      clean file
     end
 
-    master_template = export_template("upstart_scaling", "master.conf.erb", template_root)
-    master_config   = ERB.new(master_template).result(binding)
-    write_file "#{location}/#{app}.conf", master_config
+    write_template master_template, "#{app}.conf", binding
 
-    engine.procfile.entries.each do |process|
-      process_master_template = export_template("upstart_scaling", "process_master.conf.erb", template_root)
-      process_master_config = ERB.new(process_master_template).result(binding)
-      write_file "#{location}/#{app}-#{process.name}.conf", process_master_config
+    engine.each_process do |name, process|
+      next if engine.formation[name] < 1
 
-      process_instances_template = export_template("upstart_scaling", "process_instances.conf.erb", template_root)
-      process_instances_config = ERB.new(process_instances_template).result(binding)
-      write_file "#{location}/#{app}-#{process.name}-instances.conf", process_instances_config
+      port = engine.port_for(process, num)
 
-      port = engine.port_for(process, 1, self.port)
-      process_template = export_template("upstart_scaling", "process.conf.erb", template_root)
-      process_config = ERB.new(process_template).result(binding)
-      write_file "#{location}/#{app}-#{process.name}-instance.conf", process_config
+      write_template process_master_template, "#{app}-#{process.name}.conf", binding
+      write_template process_instances_template, "#{app}-#{process.name}-instances.conf", binding
+      write_template process_template, "#{app}-#{process.name}-instance.conf", binding
     end
   end
 
+  def master_template
+    "upstart_scaling/master.conf.erb"
+  end
+
+  def process_master_template
+    "upstart_scaling/process_master.conf.erb"
+  end
+
+  def process_template
+    "upstart_scaling/process.conf.erb"
+  end
+
+  def process_instances_template
+    "upstart_scaling/process_instances.conf.erb"
+  end
 end
 
